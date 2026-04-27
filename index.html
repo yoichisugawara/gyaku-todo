@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>逆・ToDoリスト | 世界一自分を甘やかす</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kiwi+Maru:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Kiwi Maru', serif; background-color: #fff5f5; }
+        .praise-anim { animation: bounce 0.5s ease infinite alternate; }
+        @keyframes bounce { from { transform: scale(1); } to { transform: scale(1.1); } }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-6 text-slate-700">
+
+    <header class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-pink-500 mb-2">💤 逆・ToDoリスト</h1>
+        <p class="text-sm text-slate-500">頑張らないことを、記録しよう。</p>
+    </header>
+
+    <main class="w-full max-w-md bg-white rounded-3xl shadow-xl p-6 border-4 border-pink-200">
+        <div class="flex gap-2 mb-6">
+            <input type="text" id="taskInput" placeholder="例：昼寝した、アイス食べた" 
+                class="flex-1 px-4 py-3 rounded-full border-2 border-pink-100 focus:outline-none focus:border-pink-300 bg-pink-50">
+            <button onclick="addTask()" class="bg-pink-400 text-white px-6 py-2 rounded-full font-bold hover:bg-pink-500 transition shadow-md">
+                報告
+            </button>
+        </div>
+
+        <div id="taskList" class="space-y-3">
+            </div>
+
+        <div id="praiseModal" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-30">
+            <div class="bg-white p-8 rounded-full shadow-2xl text-center praise-anim border-8 border-yellow-300">
+                <p id="praiseText" class="text-2xl font-bold text-pink-600"></p>
+                <button onclick="closeModal()" class="mt-4 text-xs text-slate-400 underline">照れるぜ</button>
+            </div>
+        </div>
+    </main>
+
+    <footer class="mt-10 text-center">
+        <p class="text-xs text-pink-300">※このアプリはあなたを絶対に否定しません。</p>
+    </footer>
+
+    <script>
+        const praises = [
+            "天才的なダラけっぷり！",
+            "それこそが真の休息だね",
+            "宇宙で一番偉いよ、今。",
+            "全細胞が喜んでるよ！",
+            "もはやプロの休日。脱帽。",
+            "歴史に刻むべきサボりだね",
+            "呼吸してるだけで100点満点！"
+        ];
+
+        let tasks = JSON.parse(localStorage.getItem('lazyTasks') || '[]');
+
+        function render() {
+            const list = document.getElementById('taskList');
+            list.innerHTML = tasks.map((t, i) => `
+                <div class="flex items-center justify-between bg-yellow-50 p-4 rounded-2xl border-b-2 border-yellow-200 shadow-sm animate-fade-in">
+                    <span class="font-medium">✨ ${t}</span>
+                    <button onclick="deleteTask(${i})" class="text-slate-300 hover:text-red-400 text-sm">× 消去</button>
+                </div>
+            `).reverse().join('');
+        }
+
+        function addTask() {
+            const input = document.getElementById('taskInput');
+            if (!input.value.trim()) return;
+
+            tasks.push(input.value);
+            localStorage.setItem('lazyTasks', JSON.stringify(tasks));
+            
+            showPraise();
+            input.value = '';
+            render();
+        }
+
+        function deleteTask(index) {
+            tasks.splice(tasks.length - 1 - index, 1);
+            localStorage.setItem('lazyTasks', JSON.stringify(tasks));
+            render();
+        }
+
+        function showPraise() {
+            const modal = document.getElementById('praiseModal');
+            const text = document.getElementById('praiseText');
+            text.innerText = praises[Math.floor(Math.random() * praises.length)];
+            modal.classList.remove('hidden');
+            setTimeout(closeModal, 2500);
+        }
+
+        function closeModal() {
+            document.getElementById('praiseModal').classList.add('hidden');
+        }
+
+        render();
+    </script>
+</body>
+</html>

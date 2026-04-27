@@ -2,45 +2,47 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>逆・ToDoリスト | 世界一自分を甘やかす</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kiwi+Maru:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Kiwi Maru', serif; background-color: #fff5f5; }
+        body { font-family: 'Kiwi Maru', serif; background-color: #fff5f5; -webkit-tap-highlight-color: transparent; }
         .praise-anim { animation: bounce 0.5s ease infinite alternate; }
         @keyframes bounce { from { transform: scale(1); } to { transform: scale(1.1); } }
+        /* iPhoneの入力欄のデフォルトスタイルをリセット */
+        input { -webkit-appearance: none; border-radius: 9999px; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center p-6 text-slate-700">
+<body class="min-h-screen flex flex-col items-center p-4 text-slate-700">
 
-    <header class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-pink-500 mb-2">💤 逆・ToDoリスト</h1>
-        <p class="text-sm text-slate-500">頑張らないことを、記録しよう。</p>
+    <header class="text-center mt-4 mb-8">
+        <h1 class="text-2xl font-bold text-pink-500 mb-1">💤 逆・ToDoリスト</h1>
+        <p class="text-xs text-slate-500">頑張らないことを、記録しよう。</p>
     </header>
 
-    <main class="w-full max-w-md bg-white rounded-3xl shadow-xl p-6 border-4 border-pink-200">
-        <div class="flex gap-2 mb-6">
-            <input type="text" id="taskInput" placeholder="例：昼寝した、アイス食べた" 
-                class="flex-1 px-4 py-3 rounded-full border-2 border-pink-100 focus:outline-none focus:border-pink-300 bg-pink-50">
-            <button onclick="addTask()" class="bg-pink-400 text-white px-6 py-2 rounded-full font-bold hover:bg-pink-500 transition shadow-md">
+    <main class="w-full max-w-md bg-white rounded-3xl shadow-xl p-5 border-4 border-pink-200">
+        <form id="todoForm" onsubmit="return handleFormSubmit(event)" class="flex gap-2 mb-6">
+            <input type="text" id="taskInput" placeholder="例：昼寝した" 
+                class="flex-1 min-w-0 px-4 py-3 rounded-full border-2 border-pink-100 focus:outline-none focus:border-pink-300 bg-pink-50 text-base">
+            <button type="submit" class="shrink-0 bg-pink-400 text-white px-5 py-2 rounded-full font-bold hover:bg-pink-500 transition shadow-md active:scale-95">
                 報告
             </button>
-        </div>
+        </form>
 
-        <div id="taskList" class="space-y-3">
+        <div id="taskList" class="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
             </div>
 
-        <div id="praiseModal" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-30">
-            <div class="bg-white p-8 rounded-full shadow-2xl text-center praise-anim border-8 border-yellow-300">
-                <p id="praiseText" class="text-2xl font-bold text-pink-600"></p>
-                <button onclick="closeModal()" class="mt-4 text-xs text-slate-400 underline">照れるぜ</button>
+        <div id="praiseModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 p-6">
+            <div class="bg-white p-8 rounded-3xl shadow-2xl text-center praise-anim border-8 border-yellow-300 w-full max-w-xs">
+                <p id="praiseText" class="text-xl font-bold text-pink-600 leading-relaxed"></p>
+                <button onclick="closeModal()" class="mt-4 text-xs text-slate-400 underline p-2">照れるぜ</button>
             </div>
         </div>
     </main>
 
-    <footer class="mt-10 text-center">
-        <p class="text-xs text-pink-300">※このアプリはあなたを絶対に否定しません。</p>
+    <footer class="mt-8 text-center pb-10">
+        <p class="text-[10px] text-pink-300">※あなたは存在しているだけで価値があります。</p>
     </footer>
 
     <script>
@@ -51,7 +53,9 @@
             "全細胞が喜んでるよ！",
             "もはやプロの休日。脱帽。",
             "歴史に刻むべきサボりだね",
-            "呼吸してるだけで100点満点！"
+            "呼吸してるだけで100点満点！",
+            "ナイス・オフ！",
+            "重力に身を任せて偉い！"
         ];
 
         let tasks = JSON.parse(localStorage.getItem('lazyTasks') || '[]');
@@ -59,22 +63,35 @@
         function render() {
             const list = document.getElementById('taskList');
             list.innerHTML = tasks.map((t, i) => `
-                <div class="flex items-center justify-between bg-yellow-50 p-4 rounded-2xl border-b-2 border-yellow-200 shadow-sm animate-fade-in">
-                    <span class="font-medium">✨ ${t}</span>
-                    <button onclick="deleteTask(${i})" class="text-slate-300 hover:text-red-400 text-sm">× 消去</button>
+                <div class="flex items-center justify-between bg-yellow-50 p-4 rounded-2xl border-b-2 border-yellow-200 shadow-sm">
+                    <span class="font-medium text-sm sm:text-base break-all mr-2">✨ ${t}</span>
+                    <button onclick="deleteTask(${i})" class="shrink-0 text-slate-300 hover:text-red-400 p-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
                 </div>
             `).reverse().join('');
         }
 
+        // Form送信（Enterキー & ボタンクリック）のハンドラ
+        function handleFormSubmit(event) {
+            event.preventDefault(); // ページのリロードを防ぐ
+            addTask();
+            return false;
+        }
+
         function addTask() {
             const input = document.getElementById('taskInput');
-            if (!input.value.trim()) return;
+            const text = input.value.trim();
+            if (!text) return;
 
-            tasks.push(input.value);
+            tasks.push(text);
             localStorage.setItem('lazyTasks', JSON.stringify(tasks));
             
             showPraise();
             input.value = '';
+            input.blur(); // キーボードを閉じる（iPhone用）
             render();
         }
 
@@ -86,9 +103,10 @@
 
         function showPraise() {
             const modal = document.getElementById('praiseModal');
-            const text = document.getElementById('praiseText');
-            text.innerText = praises[Math.floor(Math.random() * praises.length)];
+            const textEl = document.getElementById('praiseText');
+            textEl.innerText = praises[Math.floor(Math.random() * praises.length)];
             modal.classList.remove('hidden');
+            // 2.5秒後に自動で閉じる
             setTimeout(closeModal, 2500);
         }
 
@@ -96,6 +114,7 @@
             document.getElementById('praiseModal').classList.add('hidden');
         }
 
+        // 初期描画
         render();
     </script>
 </body>
